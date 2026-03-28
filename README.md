@@ -2,7 +2,7 @@
 
 一个功能强大的AI语音处理平台，集成了文字转语音(TTS)和语音转文字(STT)双向功能。基于Microsoft Edge TTS和硅基流动API，支持20+种语音选项，为用户提供完整的语音处理解决方案。
 >
-> 直接使用: https://tts.wangwangit.com
+> 直接使用: https://tts.zuzo.eu.cc
 
 <img width="2512" height="1284" alt="image" src="https://github.com/user-attachments/assets/570961ef-b189-480f-833e-7877ce38f19d" />
 
@@ -53,7 +53,7 @@
 #### 语音转文字模式
 1. 点击页面顶部的"语音转文字"按钮切换模式
 2. 上传音频文件（支持mp3、wav、m4a等9种格式，最大10MB）
-3. 选择Token配置：使用默认Token或输入自定义硅基流动Token
+3. 输入自定义硅基流动Token（STT 必填）
 4. 点击"开始语音转录"按钮
 5. 查看转录结果，支持复制、编辑或直接转为语音
 
@@ -168,7 +168,7 @@ curl -X POST "https://your-worker.workers.dev/v1/audio/transcriptions" \
 | 参数 | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
 | `file` | File | - | 音频文件（必填，支持多种格式） |
-| `token` | string | 默认内置 | 硅基流动API Token（可选） |
+| `token` | string | - | 硅基流动API Token（STT 必填） |
 
 #### 支持的音频格式
 - **文件格式**: mp3, wav, m4a, flac, aac, ogg, webm, amr, 3gp
