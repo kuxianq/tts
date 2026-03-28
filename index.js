@@ -1174,17 +1174,23 @@ const HTML_PAGE = `
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label" for="tokenInput">硅基流动 API Token（STT 必填）</label>
+                        <label class="form-label" for="tokenInput">API Token配置</label>
                         <div class="token-config">
                             <div class="token-option">
                                 <label class="token-label">
-                                    <input type="radio" name="tokenOption" value="custom" checked>
+                                    <input type="radio" name="tokenOption" value="default" checked>
+                                    <span>使用默认Token</span>
+                                </label>
+                            </div>
+                            <div class="token-option">
+                                <label class="token-label">
+                                    <input type="radio" name="tokenOption" value="custom">
                                     <span>使用硅基流动自定义Token</span>
                                 </label>
                             </div>
                         </div>
                         <input type="password" class="form-input" id="tokenInput" 
-                               placeholder="输入您的API Token（必填）">
+                               placeholder="输入您的API Token（可选）" style="display: none;">
                     </div>
 
                     <button type="submit" class="btn-primary" id="transcribeBtn">
@@ -1902,9 +1908,21 @@ const HTML_PAGE = `
 
         // 初始化Token配置
         function initializeTokenConfig() {
+            const tokenRadios = document.querySelectorAll('input[name="tokenOption"]');
             const tokenInput = document.getElementById('tokenInput');
-            tokenInput.style.display = 'block';
-            tokenInput.required = true;
+
+            tokenRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    if (this.value === 'custom') {
+                        tokenInput.style.display = 'block';
+                        tokenInput.required = true;
+                    } else {
+                        tokenInput.style.display = 'none';
+                        tokenInput.required = false;
+                        tokenInput.value = '';
+                    }
+                });
+            });
         }
 
         // 处理语音转录表单提交
@@ -1924,10 +1942,11 @@ const HTML_PAGE = `
             }
             
             // 获取Token配置
+            const tokenOption = document.querySelector('input[name="tokenOption"]:checked').value;
             const customToken = document.getElementById('tokenInput').value;
             
-            if (!customToken.trim()) {
-                alert('请输入硅基流动Token');
+            if (tokenOption === 'custom' && !customToken.trim()) {
+                alert('请输入自定义Token');
                 return;
             }
             
@@ -1949,7 +1968,10 @@ const HTML_PAGE = `
                 // 构建FormData
                 const formData = new FormData();
                 formData.append('file', selectedAudioFile);
-                formData.append('token', customToken);
+                
+                if (tokenOption === 'custom') {
+                    formData.append('token', customToken);
+                }
                 
                 const response = await fetch('/v1/audio/transcriptions', {
                     method: 'POST',
@@ -2825,25 +2847,8 @@ async function handleAudioTranscription(request) {
             });
         }
 
-        // 仅使用用户提供的自定义 token，避免依赖仓库内置默认 token
-        const token = customToken;
-
-        if (!token || !String(token).trim()) {
-            return new Response(JSON.stringify({
-                error: {
-                    message: '缺少硅基流动 API Token，请在网页中填写后再使用语音转文字。',
-                    type: 'invalid_request_error',
-                    param: 'token',
-                    code: 'missing_token'
-                }
-            }), {
-                status: 400,
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...makeCORSHeaders()
-                }
-            });
-        }
+        // 使用默认token或用户提供的token
+        const token = customToken || 'sk-wtldsvuprmwltxpbspbmawtolbacghzawnjhtlzlnujjkfhh';
 
         // 构建发送到硅基流动API的FormData
         const apiFormData = new FormData();
